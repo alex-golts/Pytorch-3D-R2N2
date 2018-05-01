@@ -69,11 +69,26 @@ class 3DConvLSTM(nn.Module):
 class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
-
-        self.conv1 = nn.Conv2d(
-            32, 512, kernel_size=1, stride=1, padding=0, bias=False)
         
-
+        # The input to the decoder is the hidden state of the 3DConvLSTM, 
+        # a tensor of size (B, C, D, H, W), where (D, H, W) are the 3D LSTM grid,
+        # (4, 4, 4) in the paper, C is the hidden state size at each point in the grid
+        # (128 according to the original code), and B is the batch size.
+        
+        self.unpool3d1 = nn.MaxUnpool3d((2,2,2))
+        self.conv3d1 = nn.Conv3d(256, 128, (3, 3, 3), padding=1)
+        self.relu1 = nn.LeakyReLU()
+        self.unpool3d2 = nn.MaxUnpool3d((2,2,2))
+        self.conv3d2 = nn.Conv3d(128, 128, (3, 3, 3), padding=1)
+        self.relu2 = nn.LeakyReLU()
+        self.unpool3d3 = nn.MaxUnpool3d((2,2,2))
+        self.conv3d3 = nn.Conv3d(128, 64, (3, 3, 3), padding=1)
+        self.relu3 = nn.LeakyReLU()
+        self.conv3d4 = nn.Conv3d(64, 32, (3, 3, 3), padding=1)        
+        self.relu4 = nn.LeakyReLU()
+        self.conv3d5 = nn.Conv3d(32, 2, (3, 3, 3), padding=1)
+        self.output = 
+        
     def forward(self, input, hidden1, hidden2, hidden3, hidden4):
         x = self.conv1(input)
         # TODO...
