@@ -87,10 +87,21 @@ class Decoder(nn.Module):
         self.conv3d4 = nn.Conv3d(64, 32, (3, 3, 3), padding=1)        
         self.relu4 = nn.LeakyReLU()
         self.conv3d5 = nn.Conv3d(32, 2, (3, 3, 3), padding=1)
-        self.output = 
+        self.output = nn.Softmax(dim = 2)
         
     def forward(self, input, hidden1, hidden2, hidden3, hidden4):
-        x = self.conv1(input)
-        # TODO...
         
+        x = self.unpool3d1(input)
+        x = self.conv3d1(x)
+        x = self.relu1(x)
+        x = self.unpool3d2(x)
+        x = self.conv3d2(x)
+        x = self.relu2(x)
+        x = self.unpool3d3(x)
+        x = self.relu3(x)
+        x = self.conv3d4(x)
+        x = self.relu4(x)
+        x = self.conv3d5(x)
+        x = self.output(x)
+                
         return x
