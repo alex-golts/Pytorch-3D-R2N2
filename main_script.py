@@ -27,5 +27,14 @@ weights = None # for initialization
 import network
 
 encoder = network.Encoder().cuda()
-binarizer = network.3DConvLSTM().cuda()
+convrnn = network.ConvRNN3d().cuda()
 decoder = network.Decoder().cuda()
+
+# dummy test:
+dummy_input = torch.randn((16, 3, 128, 128)).cuda() # In older than 0.4 pytorch, this would need to be wrapped by 'Variable'
+import pdb
+pdb.set_trace()
+encoded_vec = encoder(dummy_input)
+hidden_state = convrnn(encoded_vec)
+output = decoder(hidden_state)
+

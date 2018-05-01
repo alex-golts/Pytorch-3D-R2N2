@@ -9,7 +9,7 @@ class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
 
-        self.conv1 = nn.Conv2d(3, 96, kernel_size=3, stride=1, padding=3)
+        self.conv1 = nn.Conv2d(3, 96, kernel_size=7, stride=1, padding=3)
         self.pool1 = nn.MaxPool2d(2)
         self.relu1 = nn.LeakyReLU()
         self.conv2 = nn.Conv2d(96, 128, kernel_size=3, stride=1, padding=1)
@@ -27,10 +27,10 @@ class Encoder(nn.Module):
         self.conv6 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
         self.pool6 = nn.MaxPool2d(2)
         self.relu6 = nn.LeakyReLU()        
-        self.fc1 = nn.Linear(512,1024)
+        self.fc1 = nn.Linear(1024, 1024)
         self.relu7 = nn.LeakyReLU()
 
-    def forward(self, input, hidden1, hidden2, hidden3):
+    def forward(self, input):
         
         x = self.conv1(input)
         x = self.pool1(x)
@@ -50,21 +50,25 @@ class Encoder(nn.Module):
         x = self.conv6(x)
         x = self.pool6(x)
         x = self.relu6(x)
+        x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.relu7(x)
         
         return x
 
 
-class 3DConvLSTM(nn.Module):
+class ConvRNN3d(nn.Module):
     def __init__(self):
-        super(3DConvLSTM, self).__init__()
+        super(ConvRNN3d, self).__init__()
         # TODO...
 
     def forward(self, input):
-        x = input
+        #x = input
         # TODO...
-
+        
+        #dummy test:
+        x = torch.randn((16,128,4,4,4)).cuda()
+        return x
 
 class Decoder(nn.Module):
     def __init__(self):
@@ -75,21 +79,22 @@ class Decoder(nn.Module):
         # (4, 4, 4) in the paper, C is the hidden state size at each point in the grid
         # (128 according to the original code), and B is the batch size.
         
-        self.unpool3d1 = nn.MaxUnpool3d((2,2,2))
-        self.conv3d1 = nn.Conv3d(256, 128, (3, 3, 3), padding=1)
+        # the original implementation seem to have wrongly refered to upsampling as 'unpooling' 
+        self.unpool3d1 = nn.Upsample(scale_factor=2, mode='nearest')        
+        self.conv3d1 = nn.Conv3d(128, 128, (3, 3, 3), padding=1)
         self.relu1 = nn.LeakyReLU()
-        self.unpool3d2 = nn.MaxUnpool3d((2,2,2))
+        self.unpool3d2 = nn.Upsample(scale_factor=2, mode='nearest')
         self.conv3d2 = nn.Conv3d(128, 128, (3, 3, 3), padding=1)
         self.relu2 = nn.LeakyReLU()
-        self.unpool3d3 = nn.MaxUnpool3d((2,2,2))
+        self.unpool3d3 = nn.Upsample(scale_factor=2, mode='nearest')    
         self.conv3d3 = nn.Conv3d(128, 64, (3, 3, 3), padding=1)
         self.relu3 = nn.LeakyReLU()
         self.conv3d4 = nn.Conv3d(64, 32, (3, 3, 3), padding=1)        
         self.relu4 = nn.LeakyReLU()
         self.conv3d5 = nn.Conv3d(32, 2, (3, 3, 3), padding=1)
-        self.output = nn.Softmax(dim = 2)
+        self.output = nn.Softmax(dim = 1)
         
-    def forward(self, input, hidden1, hidden2, hidden3, hidden4):
+    def forward(self, input):
         
         x = self.unpool3d1(input)
         x = self.conv3d1(x)
@@ -98,6 +103,7 @@ class Decoder(nn.Module):
         x = self.conv3d2(x)
         x = self.relu2(x)
         x = self.unpool3d3(x)
+        x = self.conv3d3(x)
         x = self.relu3(x)
         x = self.conv3d4(x)
         x = self.relu4(x)
