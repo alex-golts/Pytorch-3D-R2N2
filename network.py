@@ -49,7 +49,7 @@ class Encoder(nn.Module):
         x = self.relu5(x)
         x = self.conv6(x)
         x = self.pool6(x)
-        x = self.relu6(x)
+        x = self.relu6# TODO...(x)
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.relu7(x)
@@ -60,7 +60,16 @@ class Encoder(nn.Module):
 class ConvRNN3d(nn.Module):
     def __init__(self):
         super(ConvRNN3d, self).__init__()
-        # TODO...
+        self.convlstm1 = ConvLSTMCell()
+        (self,
+                 input_channels,
+                 hidden_channels,
+                 kernel_size=3,
+                 stride=1,
+                 padding=0,
+                 dilation=1,
+                 hidden_kernel_size=1,
+                 bias=True):
 
     def forward(self, input):
         #x = input
