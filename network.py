@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from modules import ConvLSTMCell
+from modules import Conv3dLSTMCell
 
 
 class Encoder(nn.Module):
@@ -49,7 +49,7 @@ class Encoder(nn.Module):
         x = self.relu5(x)
         x = self.conv6(x)
         x = self.pool6(x)
-        x = self.relu6# TODO...(x)
+        x = self.relu6(x)
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.relu7(x)
@@ -60,24 +60,20 @@ class Encoder(nn.Module):
 class ConvRNN3d(nn.Module):
     def __init__(self):
         super(ConvRNN3d, self).__init__()
-        self.convlstm1 = ConvLSTMCell()
-        (self,
-                 input_channels,
-                 hidden_channels,
-                 kernel_size=3,
-                 stride=1,
-                 padding=0,
-                 dilation=1,
-                 hidden_kernel_size=1,
-                 bias=True):
+        self.convlstm = Conv3dLSTMCell(feature_vector_length=1024, 
+                                        hidden_layer_length=128, 
+                                        grid_size=4, 
+                                        kernel_size=3,
+                                        stride=1,
+                                        padding=1,
+                                        dilation=1,
+                                        bias=True)
 
-    def forward(self, input):
-        #x = input
-        # TODO...
-        
+    def forward(self, input, hidden):
+        hidden = self.convlstm(input, hidden)
         #dummy test:
-        x = torch.randn((16,128,4,4,4)).cuda()
-        return x
+        #x = torch.randn((16,128,4,4,4)).cuda()
+        return hidden
 
 class Decoder(nn.Module):
     def __init__(self):
