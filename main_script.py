@@ -14,15 +14,16 @@ rootDir = os.path.abspath(os.path.dirname(__file__))
 
 ### PARAMETERS ###
 
+database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 random_seed = 0 # None for randomized seed
 model_name = '3d-lstm-3'
 saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 experiment_name = 'debug'
+resume_epoch = None
 batch_size = 24
 iters = 60000
 weights = None # for initialization
-max_view = 5
+max_views = 5
 
 
 ### END PARAMETERS ###
@@ -34,21 +35,17 @@ train_transform = transforms.Compose([
     transforms.RandomCrop((128, 128)),
     transforms.ToTensor(),
 ])
-#import pdb
-#pdb.set_trace()
 
 t1_ImageFolder = time.time()
 
-train_set = dataset.Dataset(root=os.path.join(database_path, 'ShapeNetRendering'), transform=train_transform, model_portion=[0, 0.8])
+train_set = dataset.Dataset(root=os.path.join(database_path, 'ShapeNetRendering'), transform=train_transform, model_portion=[0, 0.8], max_views=max_views)
 t2_ImageFolder = time.time()
 print('Reading the image folder took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 
-import pdb
-pdb.set_trace()
 train_loader = data.DataLoader(
     dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=1)
 
-print('total images: {}; total batches: {}'.format(
+print('total models: {}; total batches: {}'.format(
     len(train_set), len(train_loader)))
 
 import network
@@ -56,6 +53,58 @@ import network
 encoder = network.Encoder().cuda()
 convrnn = network.ConvRNN3d().cuda()
 decoder = network.Decoder().cuda()
+
+solver = optim.Adam(
+    [
+        {
+            'params': encoder.parameters()
+        },
+        {
+            'params': convrnn.parameters()
+        },
+        {
+            'params': decoder.parameters()
+        },
+    ],
+    lr=args.lr)
+
+
+def resume(epoch=None):
+    if epoch is None:
+        s = 'iter'
+        epoch = 0
+    else:
+        s = 'epoch'
+
+    encoder.load_state_dict(
+        torch.load(os.path.join(saved_models_path, experiment_name, 'encoder_{}_{:08d}.pth'.format(s, epoch))))
+    convrnn.load_state_dict(
+        torch.load(os.path.join(saved_models_path, experiment_name, 'convrnn_{}_{:08d}.pth'.format(s, epoch))))
+    decoder.load_state_dict(
+        torch.load(os.path.join(saved_models_path, experiment_name, 'decoder_{}_{:08d}.pth'.format(s, epoch))))
+
+
+
+def save(index, epoch=True):
+    if not os.path.exists(os.path.join(saved_models_path, experiment_name)):
+        os.mkdir(os.path.join(saved_models_path, experiment_name)))
+
+    if epoch:
+        s = 'epoch'
+    else:
+        s = 'iter'
+
+    torch.save(encoder.state_dict(), os.path.join(saved_models_path, experiment_name, 'encoder_{}_{:08d}.pth'.format(
+        s, index)))
+
+    torch.save(convrnn.state_dict(),
+               os.path.join(saved_models_path, experiment_name, 'convrnn_{}_{:08d}.pth'.format(s, index)))
+
+    torch.save(decoder.state_dict(), os.path.join(saved_models_path, experiment_name, 'decoder_{}_{:08d}.pth'.format(
+        s, index)))
+        
+
+
 
 if False:
     # dummy test:
