@@ -72,12 +72,12 @@ class Dataset(data.Dataset):
 #        for filename in os.listdir(root):
 #            if is_image_file(filename):
 #                images.append('{}'.format(filename))        
-        combined = list(zip(cat_model_list, im_list))
-        random.shuffle(combined)        
-        cat_model_list[:], im_list[:] = zip(*combined)
+        #combined = list(zip(cat_model_list, im_list))
+        #random.shuffle(combined)        
+        #cat_model_list[:], im_list[:] = zip(*combined)
         
         self.max_views = max_views
-        self.cur_idx = 0
+        #self.cur_idx = 0
         self.root = root
         self.image_list = image_list
         self.image_dict = image_dict
@@ -86,15 +86,15 @@ class Dataset(data.Dataset):
         self.transform = transform
         self.loader = loader
 
-    def __getitem__(self):
+    def __getitem__(self, index):        
         cur_n_views = random.randint(self.max_views) + 1
-        filenames = random.choice(self.im_list[self.cur_idx], cur_n_views, replace=False)
-        imgs = torch.zeros(cur_n_views, 3, 128, 128)        
+        filenames = random.choice(self.im_list[index], cur_n_views, replace=False)
+        imgs = torch.zeros(cur_n_views, 3, 128, 128)      
         try:
             for view in range(cur_n_views):
-                imgs[view,:,:,:] = self.loader(os.path.join(self.root, self.cat_model_list[self.cur_idx][0], self.cat_model_list[self.cur_idx][1], filenames[view]))
+                imgtmp = self.loader(os.path.join(self.root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'rendering', filenames[view]))
                 if self.transform is not None:
-                    imgs[view,:,:,:] = self.transform(imgs[view,:,:,:])
+                    imgs[view,:,:,:] = self.transform(imgtmp)
         except:
             return imgs
 

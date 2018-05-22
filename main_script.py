@@ -24,7 +24,8 @@ batch_size = 24
 iters = 60000
 weights = None # for initialization
 max_views = 5
-
+lr = 0.0005
+max_epochs = 40
 
 ### END PARAMETERS ###
 
@@ -43,7 +44,7 @@ t2_ImageFolder = time.time()
 print('Reading the image folder took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 
 train_loader = data.DataLoader(
-    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=1)
+    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=0)
 
 print('total models: {}; total batches: {}'.format(
     len(train_set), len(train_loader)))
@@ -53,6 +54,17 @@ import network
 encoder = network.Encoder().cuda()
 convrnn = network.ConvRNN3d().cuda()
 decoder = network.Decoder().cuda()
+
+
+if False:
+    # dummy test:
+    dummy_input = torch.randn((16, 3, 128, 128)).cuda() # In older than 0.4 pytorch, this would need to be wrapped by 'Variable'
+    encoded_vec = encoder(dummy_input)
+    hidden0 = (torch.zeros((16, 128, 4, 4, 4)).cuda(),
+               torch.zeros((16, 128, 4, 4, 4)).cuda())
+    hidden = convrnn(encoded_vec, hidden0)
+    output = decoder(hidden[0])
+
 
 solver = optim.Adam(
     [
@@ -66,7 +78,7 @@ solver = optim.Adam(
             'params': decoder.parameters()
         },
     ],
-    lr=args.lr)
+    lr=lr)
 
 
 def resume(epoch=None):
@@ -87,7 +99,7 @@ def resume(epoch=None):
 
 def save(index, epoch=True):
     if not os.path.exists(os.path.join(saved_models_path, experiment_name)):
-        os.mkdir(os.path.join(saved_models_path, experiment_name)))
+        os.mkdir(os.path.join(saved_models_path, experiment_name))
 
     if epoch:
         s = 'epoch'
@@ -103,17 +115,29 @@ def save(index, epoch=True):
     torch.save(decoder.state_dict(), os.path.join(saved_models_path, experiment_name, 'decoder_{}_{:08d}.pth'.format(
         s, index)))
         
+# decay the learning rate by gamma when reaching 3,10,20,... epochs
+scheduler = LS.MultiStepLR(solver, milestones=[3, 10, 20, 50, 100], gamma=0.5)
 
+last_epoch = 0
+if resume_epoch != None:
+    resume(resume_epoch)
+    last_epoch = resume_epoch
+    scheduler.last_epoch = last_epoch - 1
 
+for epoch in range(last_epoch + 1, max_epochs + 1):
 
-if False:
-    # dummy test:
-    dummy_input = torch.randn((16, 3, 128, 128)).cuda() # In older than 0.4 pytorch, this would need to be wrapped by 'Variable'
-    encoded_vec = encoder(dummy_input)
-    hidden0 = (torch.zeros((16, 128, 4, 4, 4)).cuda(),
-               torch.zeros((16, 128, 4, 4, 4)).cuda())
-    hidden = convrnn(encoded_vec, hidden0)
-    output = decoder(hidden[0])
+    scheduler.step()
+    
+    import pdb
+    pdb.set_trace()
+    for batch, data in enumerate(train_loader):
+        
+        import pdb
+        pdb.set_trace()
+        print('bla')
+    
+    save(epoch)
+
 
 
 
