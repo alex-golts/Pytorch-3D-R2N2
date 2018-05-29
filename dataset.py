@@ -6,6 +6,7 @@ from torchvision import transforms
 import torch.utils.data as data
 from PIL import Image
 from numpy import random
+from binvox_rw import read_as_3d_array
 
 IMG_EXTENSIONS = [
     '.jpg',
@@ -25,8 +26,13 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def default_loader(path):
+def loader_image(path):
     return Image.open(path).convert('RGB')
+    
+def loader_label(path):
+    with open(path, 'rb') as f:
+        voxel = read_as_3d_array(f)
+    return voxel
 
 
 def portion_models(dataset_portion, category_path):
@@ -50,19 +56,20 @@ def portion_models(dataset_portion, category_path):
 
 class Dataset(data.Dataset):
 
-    def __init__(self, root, transform=None, loader=default_loader, model_portion=[0, 0.8], max_views=5, batch_size=24):
+    def __init__(self, root, transform=None, loader_image=loader_image, loader_label=loader_label, model_portion=[0, 0.8], max_views=5, batch_size=24):
         image_dict = {}        
         image_list = []   
         cat_model_list = []
         im_list = []
-            
-        for directory in os.listdir(root): # loop over model-categories
+        image_root = os.path.join(root, 'ShapeNetRendering')
+        label_root = os.path.join(root, 'ShapeNetVox32')
+        for directory in os.listdir(image_root): # loop over model-categories
             image_dict[directory] = {}
-            for subdirectory in portion_models(model_portion, os.path.join(root,directory)): # loop over models
+            for subdirectory in portion_models(model_portion, os.path.join(image_root,directory)): # loop over models
                 image_dict[directory][subdirectory] = []        
                 cat_model_list.append([directory, subdirectory])
                 im_list_cur = []
-                for filename in os.listdir(os.path.join(root,directory,subdirectory,'rendering')): # loop over image files
+                for filename in os.listdir(os.path.join(image_root,directory,subdirectory,'rendering')): # loop over image files
                     if is_image_file(filename):
                         image_list.append('{}'.format(os.path.join(directory,subdirectory,'rendering',filename)))
                         image_dict[directory][subdirectory].append('{}'.format(filename))
@@ -78,13 +85,15 @@ class Dataset(data.Dataset):
         
         self.max_views = max_views
         #self.cur_idx = 0
-        self.root = root
+        self.image_root = image_root
+        self.label_root = label_root
         self.image_list = image_list
         self.image_dict = image_dict
         self.cat_model_list = cat_model_list
         self.im_list = im_list
         self.transform = transform
-        self.loader = loader
+        self.loader_image = loader_image
+        self.loader_label = loader_label
         self.batch_size = batch_size
         self.cur_index_within_batch = self.batch_size
 
@@ -99,7 +108,8 @@ class Dataset(data.Dataset):
         imgs = torch.zeros(self.cur_n_views, 3, 128, 128)      
         try:
             for view in range(self.cur_n_views):
-                imgtmp = self.loader(os.path.join(self.root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'rendering', filenames[view]))
+                imgtmp = self.loader_image(os.path.join(self.image_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'rendering', filenames[view])) 
+                labeltmp = self.loader_label(os.path.join(self.label_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'model.binvox'))            
                 if self.transform is not None:
                     imgs[view,:,:,:] = self.transform(imgtmp)
         except:

@@ -39,7 +39,7 @@ train_transform = transforms.Compose([
 
 t1_ImageFolder = time.time()
 
-train_set = dataset.Dataset(root=os.path.join(database_path, 'ShapeNetRendering'), transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
+train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
 t2_ImageFolder = time.time()
 print('Reading the image folder took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 
