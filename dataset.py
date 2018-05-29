@@ -50,7 +50,7 @@ def portion_models(dataset_portion, category_path):
 
 class Dataset(data.Dataset):
 
-    def __init__(self, root, transform=None, loader=default_loader, model_portion=[0, 0.8], max_views=5):
+    def __init__(self, root, transform=None, loader=default_loader, model_portion=[0, 0.8], max_views=5, batch_size=24):
         image_dict = {}        
         image_list = []   
         cat_model_list = []
@@ -85,13 +85,20 @@ class Dataset(data.Dataset):
         self.im_list = im_list
         self.transform = transform
         self.loader = loader
+        self.batch_size = batch_size
+        self.cur_index_within_batch = self.batch_size
 
-    def __getitem__(self, index):        
-        cur_n_views = random.randint(self.max_views) + 1
-        filenames = random.choice(self.im_list[index], cur_n_views, replace=False)
-        imgs = torch.zeros(cur_n_views, 3, 128, 128)      
+    def __getitem__(self, index):  
+        # index indicates the model id (model id's are randomly shuffled)
+        if self.cur_index_within_batch == self.batch_size:
+            self.cur_index_within_batch = 0
+            self.cur_n_views = random.randint(self.max_views) + 1
+        self.cur_index_within_batch += 1
+        # the specific images within the chosen model are chosen at random
+        filenames = random.choice(self.im_list[index], self.cur_n_views, replace=False)
+        imgs = torch.zeros(self.cur_n_views, 3, 128, 128)      
         try:
-            for view in range(cur_n_views):
+            for view in range(self.cur_n_views):
                 imgtmp = self.loader(os.path.join(self.root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'rendering', filenames[view]))
                 if self.transform is not None:
                     imgs[view,:,:,:] = self.transform(imgtmp)

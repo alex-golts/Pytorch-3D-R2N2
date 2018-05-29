@@ -39,7 +39,7 @@ train_transform = transforms.Compose([
 
 t1_ImageFolder = time.time()
 
-train_set = dataset.Dataset(root=os.path.join(database_path, 'ShapeNetRendering'), transform=train_transform, model_portion=[0, 0.8], max_views=max_views)
+train_set = dataset.Dataset(root=os.path.join(database_path, 'ShapeNetRendering'), transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
 t2_ImageFolder = time.time()
 print('Reading the image folder took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 
@@ -128,13 +128,8 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
 
     scheduler.step()
     
-    import pdb
-    pdb.set_trace()
     for batch, data in enumerate(train_loader):
-        
-        import pdb
-        pdb.set_trace()
-        print('bla')
+        print (str(data.shape))
     
     save(epoch)
 
