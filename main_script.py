@@ -129,7 +129,8 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
     scheduler.step()
     
     for batch, data in enumerate(train_loader):
-        print (str(data.shape))
+        print (str(data['imgs'].shape))
+        print (str(data['label'].shape))
     
     save(epoch)
 
