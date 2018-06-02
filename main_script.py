@@ -124,14 +124,23 @@ if resume_epoch != None:
     last_epoch = resume_epoch
     scheduler.last_epoch = last_epoch - 1
 
+# initialize the hidden state:
+hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
+               torch.zeros((batch_size, 128, 4, 4, 4)).cuda())
 for epoch in range(last_epoch + 1, max_epochs + 1):
 
     scheduler.step()
     
     for batch, data in enumerate(train_loader):
-        print (str(data['imgs'].shape))
-        print (str(data['label'].shape))
-    
+        #print (str(data['imgs'].shape))
+        #print (str(data['label'].shape))
+        solver.zero_grad()
+        encoded_vec = encoder(data['imgs'].cuda())
+        hidden = convrnn(encoded_vec, hidden)
+        output = decoder(hidden[0])
+        loss = VozelizedSoftmax(output, data['label'])
+        loss.backward()
+        solver.step()
     save(epoch)
 
 
