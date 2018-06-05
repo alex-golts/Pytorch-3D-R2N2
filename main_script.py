@@ -11,6 +11,7 @@ import torch.utils.data as data
 from torchvision import transforms
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
+from utils import calc_mean_IOU
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,7 +24,6 @@ saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytor
 experiment_name = 'debug'
 resume_epoch = None
 batch_size = 24
-iters = 60000
 weights = None # for initialization
 max_views = 5
 lr = 0.0005
@@ -135,6 +135,7 @@ hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
 writer = SummaryWriter(log_dir=os.path.join(saved_models_path, experiment_name))
 # training loop:
 it = 0
+t1=time.time()
 for epoch in range(last_epoch + 1, max_epochs + 1):
     scheduler.step()
     for batch, data in enumerate(train_loader):
@@ -155,8 +156,13 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
         # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
         loss = NLL(output, data['label'].cuda())
+        iou = calc_mean_IOU(output.detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
         if batch%10 ==0:
+            t2=time.time()
             writer.add_scalar('loss', loss, it) 
+            writer.add_scalar('IOU', iou, it)
+            writer.add_scalar('time per 10 iters', t2-t1, it)
+            t1=time.time()
         loss.backward()
         solver.step()
     save(epoch)

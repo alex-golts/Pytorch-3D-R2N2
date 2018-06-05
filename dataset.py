@@ -116,6 +116,7 @@ class Dataset(data.Dataset):
                     imgs[view,:,:,:] = self.transform(imgtmp)
                 
         except:
+            print('PROBLEM WITH LOADING A BATCH')
             pass
 
         return {'imgs': imgs, 'label': label}
