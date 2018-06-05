@@ -37,12 +37,14 @@ train_transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-t1_ImageFolder = time.time()
-
-train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
-t2_ImageFolder = time.time()
-print('Reading the image folder took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
-
+if not 'train_set' in locals():
+    t1_ImageFolder = time.time()
+    train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
+    t2_ImageFolder = time.time()
+    print('Reading the image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
+else:
+    print('Train set already loaded')
+    
 train_loader = data.DataLoader(
     dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=0)
 
@@ -65,7 +67,7 @@ if False:
     hidden = convrnn(encoded_vec, hidden0)
     output = decoder(hidden[0])
 
-
+NLL = torch.nn.NLLLoss()
 solver = optim.Adam(
     [
         {
@@ -128,17 +130,19 @@ if resume_epoch != None:
 hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
                torch.zeros((batch_size, 128, 4, 4, 4)).cuda())
 for epoch in range(last_epoch + 1, max_epochs + 1):
-
     scheduler.step()
-    
     for batch, data in enumerate(train_loader):
-        #print (str(data['imgs'].shape))
-        #print (str(data['label'].shape))
+        print('Epoch ' + str(epoch) + '/' + str(max_epochs) + ', Batch ' + str(batch) + '/' + str(len(train_loader)))
         solver.zero_grad()
-        encoded_vec = encoder(data['imgs'].cuda())
-        hidden = convrnn(encoded_vec, hidden)
+        num_views = data['imgs'].shape[1]
+        # loop over the image views and update the 3D-LSTM hidden state
+        for v in range(num_views):
+            cur_view = torch.squeeze(data['imgs'][:,v,:,:,:])
+            encoded_vec = encoder(cur_view)
+            hidden = convrnn(encoded_vec, hidden)
+        # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
-        loss = VozelizedSoftmax(output, data['label'])
+        loss = NLL(output, data['label'])
         loss.backward()
         solver.step()
     save(epoch)

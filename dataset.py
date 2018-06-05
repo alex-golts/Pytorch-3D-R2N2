@@ -108,17 +108,17 @@ class Dataset(data.Dataset):
         imgs = torch.zeros(self.cur_n_views, 3, 128, 128)  
         label = torch.zeros(32,32,32)
         try:
-            labeltmp = self.loader_label(os.path.join(self.label_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'model.binvox'))            
-            label = torch.from_numpy(labeltmp.data.astype('uint8'))
+            labeltmp = self.loader_label(os.path.join(self.label_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'model.binvox'))                      
+            label = torch.from_numpy(labeltmp.data.astype('uint8')).long()
             for view in range(self.cur_n_views):
                 imgtmp = self.loader_image(os.path.join(self.image_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'rendering', filenames[view]))                
                 if self.transform is not None:
                     imgs[view,:,:,:] = self.transform(imgtmp)
                 
         except:
-            return {'imgs': imgs, 'label': label}
+            pass
 
-        return {'imgs': imgs, 'label': label}
+        return {'imgs': imgs.cuda(), 'label': label.cuda()}
 
     def __len__(self):
         return len(self.im_list)

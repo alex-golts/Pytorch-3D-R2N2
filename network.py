@@ -97,7 +97,7 @@ class Decoder(nn.Module):
         self.conv3d4 = nn.Conv3d(64, 32, (3, 3, 3), padding=1)        
         self.relu4 = nn.LeakyReLU()
         self.conv3d5 = nn.Conv3d(32, 2, (3, 3, 3), padding=1)
-        self.output = nn.Softmax(dim = 1)
+        self.output = nn.LogSoftmax(dim = 1)
         
     def forward(self, input):
         
