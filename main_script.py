@@ -44,13 +44,12 @@ if not 'train_set' in locals():
     print('Reading the image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
     print('Train set already loaded')
-    
+
 train_loader = data.DataLoader(
-    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=0)
+    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=8)
 
 print('total models: {}; total batches: {}'.format(
     len(train_set), len(train_loader)))
-
 import network
 
 encoder = network.Encoder().cuda()
@@ -129,20 +128,26 @@ if resume_epoch != None:
 # initialize the hidden state:
 hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
                torch.zeros((batch_size, 128, 4, 4, 4)).cuda())
+
+load_time=[]
 for epoch in range(last_epoch + 1, max_epochs + 1):
     scheduler.step()
     for batch, data in enumerate(train_loader):
+        hidden[0].detach_()
+        hidden[1].detach_()
+        #hidden[0] = hidden[0].detach()
+        #hidden[1] = hidden[1].detach()
         print('Epoch ' + str(epoch) + '/' + str(max_epochs) + ', Batch ' + str(batch) + '/' + str(len(train_loader)))
         solver.zero_grad()
         num_views = data['imgs'].shape[1]
         # loop over the image views and update the 3D-LSTM hidden state
         for v in range(num_views):
-            cur_view = torch.squeeze(data['imgs'][:,v,:,:,:])
+            cur_view = torch.squeeze(data['imgs'][:,v,:,:,:]).cuda()
             encoded_vec = encoder(cur_view)
             hidden = convrnn(encoded_vec, hidden)
         # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
-        loss = NLL(output, data['label'])
+        loss = NLL(output, data['label'].cuda())
         loss.backward()
         solver.step()
     save(epoch)

@@ -118,7 +118,7 @@ class Dataset(data.Dataset):
         except:
             pass
 
-        return {'imgs': imgs.cuda(), 'label': label.cuda()}
+        return {'imgs': imgs, 'label': label}
 
     def __len__(self):
         return len(self.im_list)
