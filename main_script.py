@@ -9,6 +9,8 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import torch.utils.data as data
 from torchvision import transforms
+from tensorboardX import SummaryWriter
+import torchvision.utils as vutils
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -129,14 +131,16 @@ if resume_epoch != None:
 hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
                torch.zeros((batch_size, 128, 4, 4, 4)).cuda())
 
-load_time=[]
+
+writer = SummaryWriter(log_dir=os.path.join(saved_models_path, experiment_name))
+# training loop:
+it = 0
 for epoch in range(last_epoch + 1, max_epochs + 1):
     scheduler.step()
     for batch, data in enumerate(train_loader):
+        it+=1
         hidden[0].detach_()
         hidden[1].detach_()
-        #hidden[0] = hidden[0].detach()
-        #hidden[1] = hidden[1].detach()
         print('Epoch ' + str(epoch) + '/' + str(max_epochs) + ', Batch ' + str(batch) + '/' + str(len(train_loader)))
         solver.zero_grad()
         num_views = data['imgs'].shape[1]
@@ -145,6 +149,9 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
             cur_view = torch.squeeze(data['imgs'][:,v,:,:,:]).cuda()
             encoded_vec = encoder(cur_view)
             hidden = convrnn(encoded_vec, hidden)
+            if batch%10 == 0:
+                x = vutils.make_grid(cur_view, nrow=1, normalize=True, scale_each=True)
+                writer.add_image('View ' + str(v), x, it)
         # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
         loss = NLL(output, data['label'].cuda())
