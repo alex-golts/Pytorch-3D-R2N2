@@ -48,7 +48,7 @@ else:
     print('Train set already loaded')
 
 train_loader = data.DataLoader(
-    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=8)
+    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4)
 
 print('total models: {}; total batches: {}'.format(
     len(train_set), len(train_loader)))
@@ -155,6 +155,8 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
         # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
         loss = NLL(output, data['label'].cuda())
+        if batch%10 ==0:
+            writer.add_scalar('loss', loss, it) 
         loss.backward()
         solver.step()
     save(epoch)
