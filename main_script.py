@@ -156,6 +156,8 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
                 writer.add_image('View ' + str(v), x, it)
         # finally decode the final hidden state and calculate the loss
         output = decoder(hidden[0])
+        # torch.exp(output) will return the softmax scores before the log
+
         loss = NLL(output, data['label'].cuda())
         iou = calc_mean_IOU(output.detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
         if batch%10 ==0:
