@@ -49,7 +49,7 @@ else:
     print('Train set already loaded')
 
 train_loader = data.DataLoader(
-    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
 
 print('total models: {}; total batches: {}'.format(
     len(train_set), len(train_loader)))

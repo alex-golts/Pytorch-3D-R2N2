@@ -108,7 +108,7 @@ class Dataset(data.Dataset):
         # the specific images within the chosen model are chosen at random
         filenames = random.choice(self.im_list[index], self.cur_n_views, replace=False)
         imgs = torch.zeros(self.cur_n_views, 3, 128, 128)  
-        label = torch.zeros(32,32,32)
+        label = torch.zeros(32,32,32, dtype=torch.long)
         try:
             labeltmp = self.loader_label(os.path.join(self.label_root, self.cat_model_list[index][0], self.cat_model_list[index][1], 'model.binvox'))                      
             label = torch.from_numpy(labeltmp.data.astype('uint8')).long()
