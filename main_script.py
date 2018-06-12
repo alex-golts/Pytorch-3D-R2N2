@@ -40,6 +40,7 @@ train_transform = transforms.Compose([
 ])
 
 if not 'train_set' in locals():
+    print('Reading image info from disk...')
     t1_ImageFolder = time.time()
     train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
