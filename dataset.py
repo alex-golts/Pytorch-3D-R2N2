@@ -64,9 +64,10 @@ class Dataset(data.Dataset):
         image_root = os.path.join(root, 'ShapeNetRendering')
         label_root = os.path.join(root, 'ShapeNetVox32')
         for directory in os.listdir(image_root): # loop over model-categories
-            print('Directory: ' + directory)
             image_dict[directory] = {}
-            for subdirectory in portion_models(model_portion, os.path.join(image_root,directory)): # loop over models
+            model_list = portion_models(model_portion, os.path.join(image_root,directory))
+            print('Directory: ' + directory + ', # of models: ' + str(len(model_list)))
+            for subdirectory in model_list: # loop over models
                 image_dict[directory][subdirectory] = []        
                 cat_model_list.append([directory, subdirectory])
                 im_list_cur = []
