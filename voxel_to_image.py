@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 from scipy import ndimage
 # prepare some coordinates
-dimsize = 8
+dimsize = 32
 x, y, z = np.indices((dimsize, dimsize, dimsize))
 
 # draw cuboids in the top left and bottom right corners, and a link between them
@@ -12,9 +12,10 @@ cube1 = (x < 3) & (y < 3) & (z < 3)
 cube2 = (x >= 5) & (y >= 5) & (z >= 5)
 link = abs(x - y) + abs(y - z) + abs(z - x) <= 2
 
+cube = (x > 5) & (x < 28) & (y > 5) & (y < 28) & (z > 5) & (z < 28)
 # combine the objects into a single boolean array
 voxels = cube1 | cube2 | link
-
+voxels = cube
 # set the colors of each object
 #colors = np.empty(voxels.shape, dtype=object)
 #colors[link] = 'red'
@@ -42,23 +43,31 @@ voxels_float = voxels.astype('float')
 #ax.set_title('surface');
 #
 #
-voxels_rot = ndimage.interpolation.rotate(voxels_float, 30, axes=(1, 0), reshape=False, output=np.float, order=3, mode='constant', cval=0.0, prefilter=False)
-#
-eps = 0.1
-colors_rot = np.zeros(voxels.shape + (3,))
-colors_rot[voxels_rot>eps,0] = voxels_rot[voxels_rot>eps]
-colors_rot[voxels_rot>eps,1] = voxels_rot[voxels_rot>eps]
-colors_rot[voxels_rot>eps,2] = voxels_rot[voxels_rot>eps]
+rot_angles = range(0,180,30)
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+cnt=1
+for ang in rot_angles:
+    voxels_rot = ndimage.interpolation.rotate(voxels_float, ang, axes=(1, 0), reshape=False, output=np.bool, order=0, mode='constant', cval=0.0, prefilter=False)
 
+#
+#eps = 0.1
+    colors_rot = np.zeros(voxels_rot.shape + (3,))
+    colors_rot[voxels_rot,:] = 1
+#colors_rot[voxels_rot>eps,0] = voxels_rot[voxels_rot>eps]
+#colors_rot[voxels_rot>eps,1] = voxels_rot[voxels_rot>eps]
+#colors_rot[voxels_rot>eps,2] = voxels_rot[voxels_rot>eps]
+    
 
 #colors_rot = np.empty(voxels.shape, dtype=object)
 #colors_rot[voxels_rot] = 'blue'
 #
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.voxels(voxels_rot, facecolors=colors_rot, edgecolor='k')
-#
-#plt.show()
+#fig = plt.figure()
+#ax = fig.gca(projection='3d')
+    plt.subplot(2,3,cnt)
+    ax.voxels(voxels_rot, facecolors=colors_rot, edgecolor='k')
+    cnt+=1
+plt.show()
 
 
 #import cv2
