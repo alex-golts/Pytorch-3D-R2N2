@@ -42,7 +42,8 @@ def portion_models(dataset_portion, category_path):
 
     def model_names(model_path):
         """ Return model names"""
-        model_names = [name for name in os.listdir(model_path)
+        model_dir_list = os.listdir(model_path)
+        model_names = [name for name in model_dir_list
                        if os.path.isdir(os.path.join(model_path, name))]
         return sorted(model_names)
 
@@ -63,7 +64,8 @@ class Dataset(data.Dataset):
         im_list = []
         image_root = os.path.join(root, 'ShapeNetRendering')
         label_root = os.path.join(root, 'ShapeNetVox32')
-        for directory in os.listdir(image_root): # loop over model-categories
+        main_dir_list = os.listdir(image_root)
+        for directory in main_dir_list: # loop over model-categories
             image_dict[directory] = {}
             model_list = portion_models(model_portion, os.path.join(image_root,directory))
             print('Directory: ' + directory + ', # of models: ' + str(len(model_list)))
@@ -71,11 +73,11 @@ class Dataset(data.Dataset):
                 image_dict[directory][subdirectory] = []        
                 cat_model_list.append([directory, subdirectory])
                 im_list_cur = []
-                for filename in os.listdir(os.path.join(image_root,directory,subdirectory,'rendering')): # loop over image files
-                    if is_image_file(filename):
-                        image_list.append('{}'.format(os.path.join(directory,subdirectory,'rendering',filename)))
-                        image_dict[directory][subdirectory].append('{}'.format(filename))
-                        im_list_cur.append(filename)
+                sub_dir_list = [f for f in os.listdir(os.path.join(image_root,directory,subdirectory,'rendering')) if is_image_file(f)]
+                for filename in sub_dir_list: # loop over image files
+                    image_list.append('{}'.format(os.path.join(directory,subdirectory,'rendering',filename)))
+                    image_dict[directory][subdirectory].append('{}'.format(filename))
+                    im_list_cur.append(filename)
                 im_list.append(im_list_cur)
 ## Simple image folder case:        
 #        for filename in os.listdir(root):
