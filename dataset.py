@@ -57,7 +57,7 @@ def portion_models(dataset_portion, category_path):
 
 class Dataset(data.Dataset):
 
-    def __init__(self, root, transform=None, loader_image=loader_image, loader_label=loader_label, model_portion=[0, 0.8], max_views=5, batch_size=24):
+    def __init__(self, root, transform=None, loader_image=loader_image, loader_label=loader_label, model_portion=[0, 0.8], min_views=1, max_views=5, batch_size=24):
         image_dict = {}        
         image_list = []   
         cat_model_list = []
@@ -87,6 +87,7 @@ class Dataset(data.Dataset):
         #random.shuffle(combined)        
         #cat_model_list[:], im_list[:] = zip(*combined)
         
+        self.min_views = min_views
         self.max_views = max_views
         #self.cur_idx = 0
         self.image_root = image_root
@@ -105,7 +106,7 @@ class Dataset(data.Dataset):
         # index indicates the model id (model id's are randomly shuffled)
         if self.cur_index_within_batch == self.batch_size:
             self.cur_index_within_batch = 0
-            self.cur_n_views = random.randint(self.max_views) + 1
+            self.cur_n_views = random.randint(self.min_views, self.max_views+1)
         self.cur_index_within_batch += 1
         # the specific images within the chosen model are chosen at random
         filenames = random.choice(self.im_list[index], self.cur_n_views, replace=False)

@@ -48,7 +48,7 @@ val_transform = transforms.Compose([
 if not 'train_set' in locals():
     print('Reading image info from disk...')
     t1_ImageFolder = time.time()
-    train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
+    train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], min_views=1, max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
     print('Reading the train image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
@@ -57,7 +57,7 @@ else:
 if not 'val_set' in locals():
     print('Reading image info from disk...')
     t1_ImageFolder = time.time()
-    val_set = dataset.Dataset(root=database_path, transform=val_transform, model_portion=[0.8, 0.9], max_views=max_views, batch_size=batch_size)
+    val_set = dataset.Dataset(root=database_path, transform=val_transform, model_portion=[0.8, 0.9], min_views=1, max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
     print('Reading the val image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
