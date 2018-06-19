@@ -12,19 +12,20 @@ from torchvision import transforms
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
 from utils import calc_mean_IOU
+from lib.validate import validate
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
 ### PARAMETERS ###
 
 database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
-random_seed = 0 # None for randomized seed
-model_name = '3d-lstm-3'
+#random_seed = 0 # None for randomized seed
+#model_name = '3d-lstm-3'
 saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-experiment_name = 'debug'
+experiment_name = 'first'
 resume_epoch = None
 batch_size = 24
-weights = None # for initialization
+#weights = None # for initialization
 max_views = 5
 lr = 0.0005
 max_epochs = 40
@@ -39,20 +40,37 @@ train_transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+
 if not 'train_set' in locals():
     print('Reading image info from disk...')
     t1_ImageFolder = time.time()
     train_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0, 0.8], max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
-    print('Reading the image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
+    print('Reading the train image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
     print('Train set already loaded')
 
+if not 'val_set' in locals():
+    print('Reading image info from disk...')
+    t1_ImageFolder = time.time()
+    val_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0.8, 0.9], max_views=max_views, batch_size=batch_size)
+    t2_ImageFolder = time.time()
+    print('Reading the val image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
+else:
+    print('Val set already loaded')
+    
 train_loader = data.DataLoader(
     dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
 
-print('total models: {}; total batches: {}'.format(
+print('total train models: {}; total train batches: {}'.format(
     len(train_set), len(train_loader)))
+    
+val_loader = data.DataLoader(
+    dataset=val_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
+
+print('total val models: {}; total val batches: {}'.format(
+    len(val_set), len(val_loader)))
+    
 import network
 
 encoder = network.Encoder().cuda()
@@ -159,7 +177,7 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
         # torch.exp(output) will return the softmax scores before the log
 
         loss = NLL(output, data['label'].cuda())
-        iou = calc_mean_IOU(output.detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
+        iou = calc_mean_IOU(torch.exp(output).detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
         if batch%10 ==0:
             t2=time.time()
             writer.add_scalar('loss', loss, it) 
@@ -168,6 +186,11 @@ for epoch in range(last_epoch + 1, max_epochs + 1):
             t1=time.time()
         loss.backward()
         solver.step()
+    mean_val_loss, mean_val_iou = validate(val_loader, encoder, convrnn, decoder)
+    print('Mean validation loss: ' + str(mean_val_loss))
+    print('Mean validation IOU: ' + str(mean_val_iou))
+    writer.add_scalar('mean validation loss vs. epoch', mean_val_loss, epoch)
+    writer.add_scalar('mean validation IOU vs. epoch', mean_val_iou, epoch)
     save(epoch)
 
 
