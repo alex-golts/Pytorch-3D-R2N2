@@ -22,7 +22,7 @@ database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 #random_seed = 0 # None for randomized seed
 #model_name = '3d-lstm-3'
 saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-experiment_name = 'first'
+experiment_name = 'first_fixed'
 resume_epoch = None
 batch_size = 24
 #weights = None # for initialization
@@ -40,6 +40,10 @@ train_transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+val_transform = transforms.Compose([
+    transforms.RandomCrop((128, 128)),
+    transforms.ToTensor(),
+])
 
 if not 'train_set' in locals():
     print('Reading image info from disk...')
@@ -53,7 +57,7 @@ else:
 if not 'val_set' in locals():
     print('Reading image info from disk...')
     t1_ImageFolder = time.time()
-    val_set = dataset.Dataset(root=database_path, transform=train_transform, model_portion=[0.8, 0.9], max_views=max_views, batch_size=batch_size)
+    val_set = dataset.Dataset(root=database_path, transform=val_transform, model_portion=[0.8, 0.9], max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
     print('Reading the val image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
