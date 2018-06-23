@@ -22,7 +22,7 @@ max_views = 5
 
 import dataset
 test_transform = transforms.Compose([
-    transforms.RandomCrop((128, 128)),
+    transforms.CenterCrop((128, 128)),
     transforms.ToTensor(),
 ])
 if not 'test_set' in locals():
