@@ -16,7 +16,7 @@ experiments_path = os.path.join('/home',os.environ['USER'],'experiments','pytorc
 experiment_name = 'first_fixed'
 epoch = 20
 batch_size = 24
-min_views = 5
+min_views = 1
 max_views = 5
 ###########################################################################################
 

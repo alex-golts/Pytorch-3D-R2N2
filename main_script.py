@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import numpy as np
 import torch
 import torch.optim as optim
@@ -11,7 +12,7 @@ import torch.utils.data as data
 from torchvision import transforms
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
-from utils import calc_mean_IOU
+from utils import calc_mean_IOU, Tee
 from lib.validate import validate
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
@@ -23,7 +24,7 @@ database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 #model_name = '3d-lstm-3'
 saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
 experiment_name = 'first_fixed'
-resume_epoch = None
+resume_epoch = 22
 batch_size = 24
 #weights = None # for initialization
 max_views = 5
@@ -32,6 +33,9 @@ max_epochs = 40
 
 ### END PARAMETERS ###
 
+# save log
+f = open(os.path.join(saved_models_path, experiment_name, 'log.txt'), 'a')
+sys.stdout = Tee(sys.stdout, f)
 
 import dataset
 
