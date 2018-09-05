@@ -1,4 +1,5 @@
 import torch
+import os
 def resume(encoder, convrnn, decoder, experiments_path, experiment_name, epoch):
     if epoch is None:
         s = 'iter'

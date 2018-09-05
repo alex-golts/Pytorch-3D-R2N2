@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import numpy as np
 import torch
 import torch.optim as optim
@@ -11,7 +12,7 @@ import torch.utils.data as data
 from torchvision import transforms
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
-from utils import calc_mean_IOU
+from utils import calc_mean_IOU, Tee
 from lib.validate import validate
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
@@ -21,17 +22,23 @@ rootDir = os.path.abspath(os.path.dirname(__file__))
 database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 #random_seed = 0 # None for randomized seed
 #model_name = '3d-lstm-3'
-saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-experiment_name = 'first_fixed'
-resume_epoch = None
+saved_models_path = os.path.join('/media/alex/E6102A5D102A34C9',os.environ['USER'],'experiments','pytorch-3D-R2N2')
+#saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
+experiment_name = 'delete'
+resume_epoch = 57
 batch_size = 24
 #weights = None # for initialization
 max_views = 5
 lr = 0.0005
-max_epochs = 40
+max_epochs = 60
 
 ### END PARAMETERS ###
 
+# save log
+if not os.path.isdir(os.path.join(saved_models_path, experiment_name)):
+    os.mkdir(os.path.join(saved_models_path, experiment_name))
+f = open(os.path.join(saved_models_path, experiment_name, 'log.txt'), 'a')
+sys.stdout = Tee(sys.stdout, f)
 
 import dataset
 
@@ -68,7 +75,7 @@ train_loader = data.DataLoader(
 
 print('total train models: {}; total train batches: {}'.format(
     len(train_set), len(train_loader)))
-    
+
 val_loader = data.DataLoader(
     dataset=val_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
 

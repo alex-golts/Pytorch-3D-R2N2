@@ -3,6 +3,10 @@ from utils import calc_mean_IOU
 from lib.resume import resume
 from lib.validate import validate
 import numpy as np
+import os
+import torch.utils.data as data
+from torchvision import transforms
+import time
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -10,15 +14,15 @@ rootDir = os.path.abspath(os.path.dirname(__file__))
 database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
 experiments_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
 experiment_name = 'first_fixed'
-epoch = 2
+epoch = 20
 batch_size = 24
-min_views = 5
+min_views = 1
 max_views = 5
 ###########################################################################################
 
 import dataset
 test_transform = transforms.Compose([
-    transforms.RandomCrop((128, 128)),
+    transforms.CenterCrop((128, 128)),
     transforms.ToTensor(),
 ])
 if not 'test_set' in locals():
