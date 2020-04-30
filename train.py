@@ -8,7 +8,7 @@ import torch.optim.lr_scheduler as LS
 #import torch.nn as nn
 #import torch.nn.functional as F
 #from torch.autograd import Variable
-import torch.utils.data as data
+import torch.utils.data as udata
 from torchvision import transforms
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
@@ -16,7 +16,6 @@ from utils import calc_mean_IOU, Tee
 from lib.validate import validate
 import configargparse
 
-rootDir = os.path.abspath(os.path.dirname(__file__))
 
 config_file_path = 'config.ini'
 parser = configargparse.ArgumentParser(default_config_files=[config_file_path])
@@ -39,35 +38,30 @@ parser.add_argument(
 parser.add_argument(
     '--max_views', type=int, default=5, help='maximum number of views')
 parser.add_argument(
-    '--lr', type=float, default=0.0005, help='learning rate')
+    '--LR', type=float, default=0.0005, help='learning rate')
 parser.add_argument(
     '--weight_decay', type=float, default=0.00005, help='weight decay')
 parser.add_argument(
-    '--max_epochs', type=int, default=60, help='number of epochs')
+    '--num_epochs', type=int, default=60, help='number of epochs')
 
     
 args = parser.parse_args()
 
-### PARAMETERS ###
-
-database_path = os.path.join(rootDir, '..', '3D-R2N2', 'ShapeNet')
-#random_seed = 0 # None for randomized seed
-#model_name = '3d-lstm-3'
-saved_models_path = os.path.join('/media/alex/E6102A5D102A34C9',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-#saved_models_path = os.path.join('/home',os.environ['USER'],'experiments','pytorch-3D-R2N2')
-experiment_name = 'delete'
-resume_epoch = 57
-batch_size = 24
-#weights = None # for initialization
-max_views = 5
-lr = 0.0005
-max_epochs = 60
-
-### END PARAMETERS ###
+database_path = args.database_path
+saved_models_path = args.saved_models_path
+experiment_name = args.experiment_name
+gpu_id = args.gpu_id
+num_workers = args.num_workers
+resume_epoch = args.resume_epoch
+batch_size = args.batch_size
+max_views = args.max_views
+lr = args.LR
+weight_decay = args.weight_decay
+num_epochs = args.num_epochs
 
 # save log
 if not os.path.isdir(os.path.join(saved_models_path, experiment_name)):
-    os.mkdir(os.path.join(saved_models_path, experiment_name))
+    os.makedirs(os.path.join(saved_models_path, experiment_name))
 f = open(os.path.join(saved_models_path, experiment_name, 'log.txt'), 'a')
 sys.stdout = Tee(sys.stdout, f)
 
@@ -101,13 +95,13 @@ if not 'val_set' in locals():
 else:
     print('Val set already loaded')
     
-train_loader = data.DataLoader(
+train_loader = udata.DataLoader(
     dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
 
 print('total train models: {}; total train batches: {}'.format(
     len(train_set), len(train_loader)))
 
-val_loader = data.DataLoader(
+val_loader = udata.DataLoader(
     dataset=val_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
 
 print('total val models: {}; total val batches: {}'.format(
@@ -118,16 +112,6 @@ import network
 encoder = network.Encoder().cuda()
 convrnn = network.ConvRNN3d().cuda()
 decoder = network.Decoder().cuda()
-
-
-if False:
-    # dummy test:
-    dummy_input = torch.randn((16, 3, 128, 128)).cuda() # In older than 0.4 pytorch, this would need to be wrapped by 'Variable'
-    encoded_vec = encoder(dummy_input)
-    hidden0 = (torch.zeros((16, 128, 4, 4, 4)).cuda(),
-               torch.zeros((16, 128, 4, 4, 4)).cuda())
-    hidden = convrnn(encoded_vec, hidden0)
-    output = decoder(hidden[0])
 
 NLL = torch.nn.NLLLoss()
 solver = optim.Adam(
@@ -163,7 +147,7 @@ def resume(epoch=None):
 
 def save(index, epoch=True):
     if not os.path.exists(os.path.join(saved_models_path, experiment_name)):
-        os.mkdir(os.path.join(saved_models_path, experiment_name))
+        os.makedirs(os.path.join(saved_models_path, experiment_name))
 
     if epoch:
         s = 'epoch'
@@ -197,13 +181,13 @@ writer = SummaryWriter(log_dir=os.path.join(saved_models_path, experiment_name))
 # training loop:
 it = 0
 t1=time.time()
-for epoch in range(last_epoch + 1, max_epochs + 1):
+for epoch in range(last_epoch + 1, num_epochs + 1):
     scheduler.step()
     for batch, data in enumerate(train_loader):
         it+=1
         hidden[0].detach_()
         hidden[1].detach_()
-        print('Epoch ' + str(epoch) + '/' + str(max_epochs) + ', Batch ' + str(batch) + '/' + str(len(train_loader)))
+        print('Epoch ' + str(epoch) + '/' + str(num_epochs) + ', Batch ' + str(batch) + '/' + str(len(train_loader)))
         solver.zero_grad()
         num_views = data['imgs'].shape[1]
         # loop over the image views and update the 3D-LSTM hidden state
