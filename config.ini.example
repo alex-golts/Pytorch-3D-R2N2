@@ -17,7 +17,7 @@ num_workers = 10
 resume_epoch = 0
 
 # Minibatch size
-batch_size = 36
+batch_size = 24
 
 # Maximum number of viewpoints during
 max_views = 5
