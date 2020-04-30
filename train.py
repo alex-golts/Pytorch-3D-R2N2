@@ -10,6 +10,7 @@ import torch.optim.lr_scheduler as LS
 #from torch.autograd import Variable
 import torch.utils.data as udata
 from torchvision import transforms
+#from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
 from utils import calc_mean_IOU, Tee
@@ -167,7 +168,7 @@ def save(index, epoch=True):
 scheduler = LS.MultiStepLR(solver, milestones=[3, 10, 20, 50, 100], gamma=0.5)
 
 last_epoch = 0
-if resume_epoch != None:
+if resume_epoch > 0:
     resume(resume_epoch)
     last_epoch = resume_epoch
     scheduler.last_epoch = last_epoch - 1
@@ -177,7 +178,7 @@ hidden = (torch.zeros((batch_size, 128, 4, 4, 4)).cuda(),
                torch.zeros((batch_size, 128, 4, 4, 4)).cuda())
 
 
-writer = SummaryWriter(log_dir=os.path.join(saved_models_path, experiment_name))
+writer = SummaryWriter(logdir=os.path.join(saved_models_path, experiment_name))
 # training loop:
 it = 0
 t1=time.time()

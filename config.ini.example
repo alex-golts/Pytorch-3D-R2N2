@@ -13,8 +13,8 @@ gpu_id = 0
 # Number of Pytorch dataloader parallel CPU workers
 num_workers = 10
 
-# If resuming an existing experiment, which epoch to resume from. Set to None if new experiment
-resume_epoch = None
+# If resuming an existing experiment, which epoch to resume from. Set to 0 if new experiment
+resume_epoch = 0
 
 # Minibatch size
 batch_size = 36
