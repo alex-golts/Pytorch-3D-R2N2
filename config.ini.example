@@ -1,0 +1,32 @@
+# Path to the ShapeNet rendered object database
+database_path = /path/to/ShapeNet
+
+# Path to location where to save experiments
+saved_models_path = /path/to/experiments
+
+# Experiment name. It will be saved with corresponding directory name under $saved_models_path
+experiment_name = exp1
+
+# GPU ID
+gpu_id = 0
+
+# Number of Pytorch dataloader parallel CPU workers
+num_workers = 10
+
+# If resuming an existing experiment, which epoch to resume from. Set to 0 if new experiment
+resume_epoch = 0
+
+# Minibatch size
+batch_size = 36
+
+# Maximum number of viewpoints during
+max_views = 5
+
+# Learning rate
+LR = 0.0001
+
+# weight decay
+weight_decay = 0.00005
+
+# Number of epochs
+num_epochs = 60
