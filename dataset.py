@@ -129,15 +129,3 @@ class Dataset(data.Dataset):
     def __len__(self):
         return len(self.im_list)
         
-#    def fetch_batch(self):
-#        cur_n_views = random.randint(self.max_views) + 1
-#        image_files = random.choice(self.im_list[self.cur_idx], cur_n_views, replace=False)
-#        batch_img = torch.zeros(cur_n_views, self.batch_size, 3, 128, 128)
-#        for view in range(cur_n_views):
-            
-        
-    
-        
-
-#class renderedViewsSampler(data.Sampler):
-    

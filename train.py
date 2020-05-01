@@ -1,16 +1,11 @@
 import time
 import os
 import sys
-#import numpy as np
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as LS
-#import torch.nn as nn
-#import torch.nn.functional as F
-#from torch.autograd import Variable
 import torch.utils.data as udata
 from torchvision import transforms
-#from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
 from utils import calc_mean_IOU, Tee
@@ -21,7 +16,8 @@ import configargparse
 config_file_path = 'config.ini'
 parser = configargparse.ArgumentParser(default_config_files=[config_file_path])
 
-
+parser.add_argument(
+    '-c', '--cfg', required=False, is_config_file=True, help='config file path')
 parser.add_argument(
     '--database_path', type=str, help='training data location')
 parser.add_argument(
@@ -29,9 +25,7 @@ parser.add_argument(
 parser.add_argument(
     '--experiment_name', type=str, help='name of the experiment')    
 parser.add_argument(
-    '--gpu_id', type=int, default=0, help='gpu id')
-parser.add_argument(
-    '--num_workers', type=int, default=4, help='number of parallel CPU workers')
+    '--num_workers', type=int, default=10, help='number of parallel CPU workers')
 parser.add_argument(
     '--resume_epoch', type=int, default=0, help='resume from epoch #')
 parser.add_argument(
@@ -39,7 +33,7 @@ parser.add_argument(
 parser.add_argument(
     '--max_views', type=int, default=5, help='maximum number of views')
 parser.add_argument(
-    '--LR', type=float, default=0.0005, help='learning rate')
+    '--LR', type=float, default=0.0001, help='learning rate')
 parser.add_argument(
     '--weight_decay', type=float, default=0.00005, help='weight decay')
 parser.add_argument(
@@ -51,7 +45,6 @@ args = parser.parse_args()
 database_path = args.database_path
 saved_models_path = args.saved_models_path
 experiment_name = args.experiment_name
-gpu_id = args.gpu_id
 num_workers = args.num_workers
 resume_epoch = args.resume_epoch
 batch_size = args.batch_size
@@ -90,20 +83,20 @@ else:
 if not 'val_set' in locals():
     print('Reading image info from disk...')
     t1_ImageFolder = time.time()
-    val_set = dataset.Dataset(root=database_path, transform=val_transform, model_portion=[0.8, 0.9], min_views=1, max_views=max_views, batch_size=batch_size)
+    val_set = dataset.Dataset(root=database_path, transform=val_transform, model_portion=[0.8, 1], min_views=1, max_views=max_views, batch_size=batch_size)
     t2_ImageFolder = time.time()
     print('Reading the val image info took ' + str(round(t2_ImageFolder - t1_ImageFolder, 2)) + ' seconds')
 else:
     print('Val set already loaded')
     
 train_loader = udata.DataLoader(
-    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
+    dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
 
 print('total train models: {}; total train batches: {}'.format(
     len(train_set), len(train_loader)))
 
 val_loader = udata.DataLoader(
-    dataset=val_set, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
+    dataset=val_set, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
 
 print('total val models: {}; total val batches: {}'.format(
     len(val_set), len(val_loader)))

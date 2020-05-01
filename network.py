@@ -1,7 +1,4 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 from modules import Conv3dLSTMCell
 
 
@@ -71,8 +68,6 @@ class ConvRNN3d(nn.Module):
 
     def forward(self, input, hidden):
         hidden = self.convlstm(input, hidden)
-        #dummy test:
-        #x = torch.randn((16,128,4,4,4)).cuda()
         return hidden
 
 class Decoder(nn.Module):
@@ -85,13 +80,13 @@ class Decoder(nn.Module):
         # (128 according to the original code), and B is the batch size.
         
         # the original implementation seem to have wrongly refered to upsampling as 'unpooling' 
-        self.unpool3d1 = nn.Upsample(scale_factor=2, mode='nearest')        
+        #self.unpool3d1 = nn.Upsample(scale_factor=2, mode='nearest')        
         self.conv3d1 = nn.Conv3d(128, 128, (3, 3, 3), padding=1)
         self.relu1 = nn.LeakyReLU()
-        self.unpool3d2 = nn.Upsample(scale_factor=2, mode='nearest')
+        #self.unpool3d2 = nn.Upsample(scale_factor=2, mode='nearest')
         self.conv3d2 = nn.Conv3d(128, 128, (3, 3, 3), padding=1)
         self.relu2 = nn.LeakyReLU()
-        self.unpool3d3 = nn.Upsample(scale_factor=2, mode='nearest')    
+        #self.unpool3d3 = nn.Upsample(scale_factor=2, mode='nearest')    
         self.conv3d3 = nn.Conv3d(128, 64, (3, 3, 3), padding=1)
         self.relu3 = nn.LeakyReLU()
         self.conv3d4 = nn.Conv3d(64, 32, (3, 3, 3), padding=1)        
@@ -101,13 +96,16 @@ class Decoder(nn.Module):
         
     def forward(self, input):
         
-        x = self.unpool3d1(input)
+        #x = self.unpool3d1(input)
+        x = nn.functional.interpolate(input, scale_factor=2, mode='nearest')
         x = self.conv3d1(x)
         x = self.relu1(x)
-        x = self.unpool3d2(x)
+        #x = self.unpool3d2(x)
+        x = nn.functional.interpolate(x, scale_factor=2, mode='nearest')   
         x = self.conv3d2(x)
         x = self.relu2(x)
-        x = self.unpool3d3(x)
+        #x = self.unpool3d3(x)
+        x = nn.functional.interpolate(x, scale_factor=2, mode='nearest') 
         x = self.conv3d3(x)
         x = self.relu3(x)
         x = self.conv3d4(x)

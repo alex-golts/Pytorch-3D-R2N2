@@ -1,7 +1,5 @@
-import torch.nn as nn
-import torch.nn.functional as F
 import torch
-from torch.autograd import Variable
+import torch.nn as nn
 from torch.nn.modules.utils import _pair
 
 class Conv3dLSTMCell(nn.Module):
@@ -49,12 +47,12 @@ class Conv3dLSTMCell(nn.Module):
         gates = self.linear(input).view(-1, self.gate_channels, self.grid_size, self.grid_size, self.grid_size) \
                 + self.conv3d(hx)
         ingate, forgetgate, cellgate = gates.chunk(3, 1)
-        ingate = F.sigmoid(ingate)
-        forgetgate = F.sigmoid(forgetgate)
-        cellgate =  F.tanh(cellgate)
+        ingate = torch.sigmoid(ingate)
+        forgetgate = torch.sigmoid(forgetgate)
+        cellgate =  torch.tanh(cellgate)
         
         cy = (forgetgate * cx) + (ingate * cellgate)
-        hy = F.tanh(cy)
+        hy = torch.tanh(cy)
 
         return hy, cy
         

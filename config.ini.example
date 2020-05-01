@@ -7,9 +7,6 @@ saved_models_path = /path/to/experiments
 # Experiment name. It will be saved with corresponding directory name under $saved_models_path
 experiment_name = exp1
 
-# GPU ID
-gpu_id = 0
-
 # Number of Pytorch dataloader parallel CPU workers
 num_workers = 10
 
