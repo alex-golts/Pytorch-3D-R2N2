@@ -22,7 +22,7 @@ parser.add_argument(
 parser.add_argument(
     '--resume_epoch', type=int, default=0, help='resume from epoch #')
 parser.add_argument(
-    '--batch_size', type=int, default=8, help='batch size')
+    '--batch_size', type=int, default=24, help='batch size')
 parser.add_argument(
     '--min_views', type=int, default=5, help='minimum number of views')
 parser.add_argument(
