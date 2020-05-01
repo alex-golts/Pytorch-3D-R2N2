@@ -27,12 +27,12 @@ parser.add_argument(
     '--min_views', type=int, default=5, help='minimum number of views')
 parser.add_argument(
     '--max_views', type=int, default=5, help='maximum number of views')
-#parser.add_argument(
-#    '--LR', type=float, default=0.0001, help='learning rate')
-#parser.add_argument(
-#    '--weight_decay', type=float, default=0.00005, help='weight decay')
-#parser.add_argument(
-#    '--num_epochs', type=int, default=60, help='number of epochs')
+parser.add_argument(
+    '--LR', type=float, default=0.0001, help='learning rate')
+parser.add_argument(
+    '--weight_decay', type=float, default=0.00005, help='weight decay')
+parser.add_argument(
+    '--num_epochs', type=int, default=60, help='number of epochs')
 
     
 args = parser.parse_args()

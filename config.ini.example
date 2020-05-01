@@ -16,7 +16,10 @@ resume_epoch = 0
 # Minibatch size
 batch_size = 24
 
-# Maximum number of viewpoints during
+# Minimum number of viewpoints in a minibatch
+min_views = 1
+
+# Maximum number of viewpoints in a minibatch
 max_views = 5
 
 # Learning rate
