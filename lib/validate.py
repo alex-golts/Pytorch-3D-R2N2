@@ -22,7 +22,7 @@ def validate(val_loader, encoder, convrnn, decoder):
         output = decoder(hidden[0])
         # torch.exp(output) will return the softmax scores before the log
         loss = NLL(output, data['label'].cuda()).item()
-        iou = calc_mean_IOU(torch.exp(output).detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
+        iou = calc_mean_IOU(torch.exp(output).detach().cpu().numpy(), data['label'].numpy(), 0.4)[5]
         print('Batch ' + str(batch) + '/' + str(len(val_loader)) + ': Loss=' + str(loss) + ', IOU=' + str(iou))
         losses.append(loss)
         ious.append(iou)

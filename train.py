@@ -29,7 +29,9 @@ parser.add_argument(
 parser.add_argument(
     '--resume_epoch', type=int, default=0, help='resume from epoch #')
 parser.add_argument(
-    '--batch_size', type=int, default=8, help='batch size')
+    '--batch_size', type=int, default=24, help='batch size')
+parser.add_argument(
+    '--min_views', type=int, default=1, help='minimum number of views')
 parser.add_argument(
     '--max_views', type=int, default=5, help='maximum number of views')
 parser.add_argument(
@@ -197,7 +199,7 @@ for epoch in range(last_epoch + 1, num_epochs + 1):
         # torch.exp(output) will return the softmax scores before the log
 
         loss = NLL(output, data['label'].cuda())
-        iou = calc_mean_IOU(torch.exp(output).detach().cpu().numpy(), data['label'].numpy(), 0.5)[5]
+        iou = calc_mean_IOU(torch.exp(output).detach().cpu().numpy(), data['label'].numpy(), 0.4)[5]
         if batch%10 ==0:
             t2=time.time()
             writer.add_scalar('loss', loss, it) 
