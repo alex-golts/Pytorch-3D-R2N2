@@ -1,6 +1,6 @@
 # Pytorch-3D-R<sup>2</sup>N<sup>2</sup>: 3D Recurrent Reconstruction Neural Network
 
-This is a Pytorch implementation of the paper [Choy et al., 3D-R2N2: A Unified Approach for Single and Multi-view 3D Object Reconstruction, ECCV 2016](http://arxiv.org/abs/1604.00449). Given one or multiple views of an object, the network generates voxelized ( a voxel is the 3D equivalent of a pixel) reconstruction of the object in 3D.  
+This is a Pytorch implementation of the paper ["3D-R2N2: A Unified Approach for Single and Multi-view 3D Object Reconstruction"](http://arxiv.org/abs/1604.00449) by Choy et al. Given one or multiple views of an object, the network generates voxelized ( a voxel is the 3D equivalent of a pixel) reconstruction of the object in 3D.  
 See [chrischoy/3D-R2N2](http://github.com/chrischoy/3D-R2N2) for the original paper author's implementation in Theano, as well as overview of the method.
 
 ## Pre-trained model
