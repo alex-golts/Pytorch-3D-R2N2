@@ -1,3 +1,6 @@
+## Parameters required for both train and test
+## --------------------------------------------
+
 # Path to the ShapeNet rendered object database
 database_path = /path/to/ShapeNet
 
@@ -21,6 +24,11 @@ min_views = 1
 
 # Maximum number of viewpoints in a minibatch
 max_views = 5
+
+
+
+## Parameters required only for training
+## -------------------------------------
 
 # Learning rate
 LR = 0.0001
