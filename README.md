@@ -5,7 +5,7 @@ See [chrischoy/3D-R2N2](http://github.com/chrischoy/3D-R2N2) for the original pa
 
 ## Pre-trained model
 For now, only the non-residual LSTM-based architecture with neighboring recurrent unit connection is implemented. It is called *3D-LSTM-3* in the paper.  
-A pre-trained model based on this architecture can be downloaded from [here](https://drive.google.com/file/d/1znX6nMqaIzr-jw7Bnh_422uqDmXD-rLh/view?usp=sharing). It obtains the following result on the ShapeNet rendered images test dataset:    
+A pre-trained model based on this architecture can be downloaded from [here](https://mega.nz/file/BHQQVJ6D#zVukPkk1dXI4qnPxzz3naoYi1RUY6wKLcLiq3q90jPU). It obtains the following result on the ShapeNet rendered images test dataset:    
 IoU | Loss |
 --- | --- |
 0.591 | 0.093 | 
