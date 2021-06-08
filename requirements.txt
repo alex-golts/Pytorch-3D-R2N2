@@ -5,7 +5,7 @@
 ConfigArgParse == 0.14.0
 
 # pytorch-3d-r2n2/dataset.py: 7
-Pillow == 8.1.1
+Pillow == 8.2.0
 
 # pytorch-3d-r2n2/binvox_rw.py: 65
 # pytorch-3d-r2n2/dataset.py: 8
