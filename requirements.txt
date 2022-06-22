@@ -12,7 +12,7 @@ Pillow == 9.0.1
 # pytorch-3d-r2n2/lib/test_minibatch.py: 4
 # pytorch-3d-r2n2/lib/validate.py: 3
 # pytorch-3d-r2n2/utils.py: 1
-numpy == 1.21.0
+numpy == 1.22.0
 
 # pytorch-3d-r2n2/train.py: 9
 tensorboardX == 1.7
